@@ -38,9 +38,12 @@ namespace CompresionLogs
                     Console.WriteLine("Error: La carpeta a monitorear no existe");
                     continue;
                 }
-
                 string pathFolder = _config.MonitoringFolders[i].Path;
-                var archivosLog = Directory.EnumerateFiles(pathFolder, "*.log").ToList();
+                if (_config.MonitoringFolders[i].MonthsToKeep == null)
+                {
+                    DateTime fechaCorte = DateTime.Now.AddMonths(-_config.MonthsToKeep);
+                    var archivosLog = Directory.EnumerateFiles(pathFolder, "*.log").Where(f => f.la).ToList();
+                }
 
                 if (archivosLog.Count > 0)
                 {
