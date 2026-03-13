@@ -1,0 +1,16 @@
+﻿{
+  "MonthsToKeep": 3,
+  "DayToExecute": 1,
+  "DestinationPath": "C:\\Backups\\Logs",
+  "DefaultExtensions": [ ".log", ".txt" ],
+  "MonitoringFolders": [
+    {
+      "Path": "C:\\Temp",
+      "MonthsToKeep": 2
+    },
+    {
+      "Path": "C:\\Temp\\Uno",
+      "MonthsToKeep": null
+    }
+  ]
+}

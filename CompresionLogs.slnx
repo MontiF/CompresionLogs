@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CompresionLogs/CompresionLogs.csproj" />
+  <Project Path="CompresionLogsConfig/CompresionLogsConfig.csproj" />
+  <Project Path="LibCompresionLogs/LibCompresionLogs.csproj" />
+</Solution>
