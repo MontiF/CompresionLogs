@@ -3,7 +3,6 @@ using LibCompresionLogs.Models;
 using SevenZip;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -11,64 +10,62 @@ namespace CompresionLogs
 {
     internal class Program
     {
-        private static Configuration _config;
-        private static readonly string _configPath = "C:\\CompresionLogs\\config.json";
-
         static void Main(string[] args)
         {
             SevenZipBase.SetLibraryPath(@"C:\Program Files\7-Zip\7z.dll");
 
-            _config = ConfigService.Load(_configPath);
+            var config = ConfigService.Instance;
 
-            if (!ComprobacionesPrevias(_config))
+            if (!ComprobacionesPrevias(config))
             {
                 return;
             }
 
-            if (!Directory.Exists(_config.DestinationPath))
+            if (!Directory.Exists(config.DestinationPath))
             {
-                Directory.CreateDirectory(_config.DestinationPath);
+                Directory.CreateDirectory(config.DestinationPath);
             }
 
-            int nMonitoringFolders = _config.MonitoringFolders.Count;
-            for (int i = 0; i < nMonitoringFolders; i++)
+            foreach (var folder in config.MonitoringFolders)
             {
-                if (string.IsNullOrEmpty(_config.MonitoringFolders[i].Path) || !Directory.Exists(_config.MonitoringFolders[i].Path))
+                if (string.IsNullOrEmpty(folder.Path) || !Directory.Exists(folder.Path))
                 {
-                    Console.WriteLine("Error: La carpeta a monitorear no existe");
+                    Console.WriteLine($"Error: La carpeta {folder.Path} no existe");
                     continue;
                 }
-                string pathFolder = _config.MonitoringFolders[i].Path;
-                if (_config.MonitoringFolders[i].MonthsToKeep == null)
-                {
-                    DateTime fechaCorte = DateTime.Now.AddMonths(-_config.MonthsToKeep);
-                    var archivosLog = Directory.EnumerateFiles(pathFolder, "*.log").Where(f => f.la).ToList();
-                }
 
-                if (archivosLog.Count > 0)
+                int months = folder.MonthsToKeep ?? config.MonthsToKeep;
+                DateTime fechaCorte = DateTime.Now.AddMonths(-months);
+
+                List<string> todosLosArchivos = new List<string>();
+                foreach (var extension in config.DefaultExtensions)
+                {
+                    var archivos = Directory.EnumerateFiles(folder.Path, $"*{extension}").Where(f =>
+                    {
+                        return File.GetLastWriteTime(f) <= fechaCorte;
+                    }); todosLosArchivos.AddRange(archivos);
+                }
+                if (todosLosArchivos.Count > 0)
                 {
                     try
                     {
-                        string folderName = new DirectoryInfo(pathFolder).Name;
+                        string folderName = new DirectoryInfo(folder.Path).Name;
                         string fileName = $"{folderName}_{DateTime.Today:yyyyMMdd}.7z";
-                        string pathSaveZip = Path.Combine(_config.DestinationPath, fileName);
+                        string pathSaveZip = Path.Combine(config.DestinationPath, fileName);
 
-                        SevenZipCompressor compressor = new SevenZipCompressor();
-                        compressor.ArchiveFormat = OutArchiveFormat.SevenZip;
-                        compressor.CompressionLevel = CompressionLevel.High;
-
-                        compressor.CompressFiles(pathSaveZip, archivosLog.ToArray());
-
-                        Console.WriteLine($"Archivo creado: {pathSaveZip} : ");
-
-                        foreach (var log in archivosLog)
+                        SevenZipCompressor compressor = new SevenZipCompressor
                         {
-                            Console.Write($"| {Path.GetFileName(log)} | ");
-                            try {
-                                File.Delete(log); 
-                            } catch { 
-                                Console.WriteLine($"No se pudo borrar: {log}");
-                            }
+                            ArchiveFormat = OutArchiveFormat.SevenZip,
+                            CompressionLevel = CompressionLevel.High
+                        };
+
+                        compressor.CompressFiles(pathSaveZip, todosLosArchivos.ToArray());
+                        Console.WriteLine($"Archivo creado: {pathSaveZip}");
+
+                        foreach (var archivo in todosLosArchivos)
+                        {
+                            try { File.Delete(archivo); }
+                            catch { Console.WriteLine($"No se pudo borrar: {archivo}"); }
                         }
                     }
                     catch (Exception ex)
@@ -78,34 +75,47 @@ namespace CompresionLogs
                 }
                 else
                 {
-                    Console.WriteLine($"No se encontraron .log en {pathFolder}");
+                    Console.WriteLine($"No se encontraron losw archivos con las extensiones configuradas en {folder.Path}");
+                }
+            }
+            if (config.ZipLifeTimeMonths != 0)
+            {
+                int lifeTimeMonths = config.ZipLifeTimeMonths;
+                DateTime fechaCorteZip = DateTime.Now.AddMonths(-lifeTimeMonths);
+                var zipsToDelete = Directory.EnumerateFiles(config.DestinationPath, "*.7z").Where(f =>
+                {
+                    return File.GetLastWriteTime(f) <= fechaCorteZip;
+                }).ToList();
+
+                foreach (var zip in zipsToDelete)
+                {
+                    try{
+                        File.Delete(zip);
+                        Console.WriteLine($"ZIP antiguo eliminado: {Path.GetFileName(zip)}");
+                    }catch{
+                        Console.WriteLine($"No se pudo eliminar el ZIP: {zip}");
+                    }
+                    
                 }
             }
         }
-
-        static bool ComprobacionesPrevias(Configuration _config)
+        static bool ComprobacionesPrevias(Configuration config)
         {
-            if (!File.Exists(_configPath))
-            {
-                Console.WriteLine("Error: Debes realizar antes la configuracion");
-                return false;
-            }
-
-            if (_config.MonitoringFolders == null || _config.MonitoringFolders.Count == 0)
+            if (config.MonitoringFolders == null || config.MonitoringFolders.Count == 0)
             {
                 Console.WriteLine("Error: Carpetas no configuradas");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(_config.DestinationPath))
+            if (string.IsNullOrEmpty(config.DestinationPath))
             {
                 Console.WriteLine("Error: Destino no configurado");
                 return false;
             }
 
-            if (_config.DayToExecute != DateTime.Now.Day)
+            if (config.DayToExecute != DateTime.Now.Day)
             {
-                Console.WriteLine("Hoy no toca bro");
+                Console.WriteLine("Hoy no toca");
                 return false;
             }
 

@@ -2,41 +2,43 @@ using LibCompresionLogs.Controladores;
 using LibCompresionLogs.Models;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CompresionLogsConfig
 {
     public partial class Form1 : Form
     {
-        private Configuration _config;
-        private readonly string _configPath = "C:\\CompresionLogs\\config.json";
-
         public Form1()
         {
             InitializeComponent();
-
-            _config = ConfigService.Load(_configPath);
-
             LoadDataToUI();
         }
 
         private void LoadDataToUI()
         {
-            numGlobalMonths.Value = _config.MonthsToKeep;
-            numDayToRun.Value = _config.DayToExecute;
-            txtDestPath.Text = _config.DestinationPath;
+            var config = ConfigService.Instance;
 
-            dgvFolders.DataSource = new BindingList<MonitoringFolder>(_config.MonitoringFolders);
+            numGlobalMonths.Value = config.MonthsToKeep;
+            numDayToRun.Value = config.DayToExecute;
+            numZipLife.Value = config.ZipLifeTimeMonths;
+            txtDestPath.Text = config.DestinationPath;
+            txtExtensions.Text = string.Join(", ", config.DefaultExtensions);
+
+            txtFTPHost.Text = config.FTPHost;
+            numFTPPort.Value = config.FTPPort;
+            txtFTPUser.Text = config.FTPUser;
+            txtFTPPass.Text = config.FTPPass;
+            txtFTPPath.Text = config.FTPPath;
+
+            dgvFolders.DataSource = new BindingList<MonitoringFolder>(config.MonitoringFolders);
         }
 
         private void btnSelectDest_Click(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
             {
-                if (fbd.ShowDialog() == DialogResult.OK)
-                {
-                    txtDestPath.Text = fbd.SelectedPath;
-                }
+                if (fbd.ShowDialog() == DialogResult.OK) txtDestPath.Text = fbd.SelectedPath;
             }
         }
 
@@ -46,37 +48,45 @@ namespace CompresionLogsConfig
             {
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    var lista = (BindingList<MonitoringFolder>)dgvFolders.DataSource;
-                    lista.Add(new MonitoringFolder { Path = fbd.SelectedPath, MonthsToKeep = null });
+                    ((BindingList<MonitoringFolder>)dgvFolders.DataSource).Add(new MonitoringFolder { Path = fbd.SelectedPath });
                 }
             }
+        }
+
+        private void btnRemoveFolder_Click(object sender, EventArgs e)
+        {
+            if (dgvFolders.CurrentRow != null)
+                ((BindingList<MonitoringFolder>)dgvFolders.DataSource).RemoveAt(dgvFolders.CurrentRow.Index);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             dgvFolders.EndEdit();
-            dgvFolders.BindingContext[dgvFolders.DataSource].EndCurrentEdit();
+            var config = ConfigService.Instance;
 
-            _config.MonthsToKeep = (int)numGlobalMonths.Value;
-            _config.DayToExecute = (int)numDayToRun.Value;
-            _config.DestinationPath = txtDestPath.Text;
+            config.MonthsToKeep = (int)numGlobalMonths.Value;
+            config.DayToExecute = (int)numDayToRun.Value;
+            config.ZipLifeTimeMonths = (int)numZipLife.Value;
+            config.DestinationPath = txtDestPath.Text;
+            config.DefaultExtensions = txtExtensions.Text.Split(',').Select(x => x.Trim().ToLower()).Where(x => !string.IsNullOrEmpty(x)).ToList();
+
+            config.FTPHost = txtFTPHost.Text;
+            config.FTPPort = (int)numFTPPort.Value;
+            config.FTPUser = txtFTPUser.Text;
+            config.FTPPass = txtFTPPass.Text;
+            config.FTPPath = txtFTPPath.Text;
+
             try
             {
-                ConfigService.Save(_configPath, _config);
-                MessageBox.Show("Configuración guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ConfigService.Save();
+                MessageBox.Show("Configuración guardada.");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al guardar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
-        private void btnRemoveFolder_Click(object sender, EventArgs e)
+
+        private void numFTPPort_ValueChanged(object sender, EventArgs e)
         {
-            if (dgvFolders.CurrentRow != null)
-            {
-                var lista = (BindingList<MonitoringFolder>)dgvFolders.DataSource;
-                lista.RemoveAt(dgvFolders.CurrentRow.Index);
-            }
+
         }
     }
 }

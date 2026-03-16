@@ -1,35 +1,57 @@
 ﻿using LibCompresionLogs.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.IO;
+using System.Collections.Generic;
 
 namespace LibCompresionLogs.Controladores
 {
     public static class ConfigService
     {
+        private static Configuration? _instance;
+        private static readonly object _lock = new object();
+        private static readonly string _configPath = @"C:\CompresionLogs\config.json";
+
         private static readonly JsonSerializerOptions _options = new JsonSerializerOptions
         {
             WriteIndented = true,
             PropertyNameCaseInsensitive = true
         };
 
-        public static Configuration Load(string filePath)
+        public static Configuration Instance
         {
-            if (!File.Exists(filePath))
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = Load();
+                        }
+                    }
+                }
+                return _instance;
+            }
+        }
+
+        private static Configuration Load()
+        {
+            if (!File.Exists(_configPath))
             {
                 return new Configuration
                 {
                     MonthsToKeep = 3,
                     DayToExecute = 1,
-                    DefaultExtensions = new List<string> { ".log" }
+                    MonitoringFolders = new List<MonitoringFolder>(),
+                    ZipLifeTimeMonths = 0,
+                    DefaultExtensions = new List<string>() { ".log"}
                 };
             }
 
             try
             {
-                string json = File.ReadAllText(filePath);
+                string json = File.ReadAllText(_configPath);
                 return JsonSerializer.Deserialize<Configuration>(json, _options) ?? new Configuration();
             }
             catch
@@ -37,15 +59,17 @@ namespace LibCompresionLogs.Controladores
                 return new Configuration();
             }
         }
-        public static void Save(string filePath, Configuration config) { 
-            string? directory = Path.GetDirectoryName(filePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) { 
+
+        public static void Save()
+        {
+            string? directory = Path.GetDirectoryName(_configPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
                 Directory.CreateDirectory(directory);
             }
 
-            string json = JsonSerializer.Serialize(config, _options);
-            File.WriteAllText(filePath, json);
-
+            string json = JsonSerializer.Serialize(Instance, _options);
+            File.WriteAllText(_configPath, json);
         }
     }
 }
