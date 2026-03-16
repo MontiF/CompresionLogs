@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentFTP;
+using Renci.SshNet;
 
 namespace CompresionLogs
 {
@@ -61,6 +63,40 @@ namespace CompresionLogs
 
                         compressor.CompressFiles(pathSaveZip, todosLosArchivos.ToArray());
                         Console.WriteLine($"Archivo creado: {pathSaveZip}");
+
+                        bool uploadSuccess = true;
+                        if (!string.IsNullOrEmpty(config.FTPHost))
+                        {
+                            try
+                            {
+                                if (config.IsSFTP)
+                                {
+                                    using (var sftp = new SftpClient(config.FTPHost, config.FTPPort, config.FTPUser, config.FTPPass))
+                                    {
+                                        sftp.Connect();
+                                        using (var fileStream = File.OpenRead(pathSaveZip))
+                                        {
+                                            sftp.UploadFile(fileStream, config.FTPPath + "/" + fileName);
+                                        }
+                                        sftp.Disconnect();
+                                    }
+                                }
+                                else
+                                {
+                                    using (var ftp = new FtpClient(config.FTPHost, config.FTPUser, config.FTPPass, config.FTPPort))
+                                    {
+                                        ftp.Connect();
+                                        ftp.UploadFile(pathSaveZip, config.FTPPath + "/" + fileName);
+                                    }
+                                }
+                                Console.WriteLine("Transferencia completada con éxito.");
+                            }
+                            catch (Exception ftpEx)
+                            {
+                                Console.WriteLine($"Error FTP: {ftpEx.Message}");
+                                uploadSuccess = false;
+                            }
+                        }
 
                         foreach (var archivo in todosLosArchivos)
                         {

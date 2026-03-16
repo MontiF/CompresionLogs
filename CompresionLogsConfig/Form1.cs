@@ -23,13 +23,14 @@ namespace CompresionLogsConfig
             numDayToRun.Value = config.DayToExecute;
             numZipLife.Value = config.ZipLifeTimeMonths;
             txtDestPath.Text = config.DestinationPath;
-            txtExtensions.Text = string.Join(", ", config.DefaultExtensions);
+            txtExtensions.Text = config.DefaultExtensions != null ? string.Join(", ", config.DefaultExtensions) : ".log";
 
             txtFTPHost.Text = config.FTPHost;
             numFTPPort.Value = config.FTPPort;
             txtFTPUser.Text = config.FTPUser;
             txtFTPPass.Text = config.FTPPass;
             txtFTPPath.Text = config.FTPPath;
+            chkIsSFTP.Checked = config.IsSFTP;
 
             dgvFolders.DataSource = new BindingList<MonitoringFolder>(config.MonitoringFolders);
         }
@@ -75,6 +76,7 @@ namespace CompresionLogsConfig
             config.FTPUser = txtFTPUser.Text;
             config.FTPPass = txtFTPPass.Text;
             config.FTPPath = txtFTPPath.Text;
+            config.IsSFTP = chkIsSFTP.Checked;
 
             try
             {
@@ -84,9 +86,10 @@ namespace CompresionLogsConfig
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        private void numFTPPort_ValueChanged(object sender, EventArgs e)
+        private void chkIsSFTP_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (chkIsSFTP.Checked && numFTPPort.Value == 21) numFTPPort.Value = 22;
+            else if (!chkIsSFTP.Checked && numFTPPort.Value == 22) numFTPPort.Value = 21;
         }
     }
 }

@@ -16,5 +16,6 @@ namespace LibCompresionLogs.Models
         public string FTPUser { get; set; } = string.Empty;
         public string FTPPass { get; set; } = string.Empty;
         public string FTPPath { get; set; } = string.Empty;
+        public bool IsSFTP { get; set; } = false;
     }
 }

@@ -28,6 +28,7 @@
             txtDestPath = new TextBox();
             lblDest = new Label();
             groupBoxFTP = new GroupBox();
+            chkIsSFTP = new CheckBox();
             lblFTPPath = new Label();
             txtFTPPath = new TextBox();
             lblFTPPass = new Label();
@@ -81,7 +82,7 @@
             lblExtensions.Location = new Point(230, 125);
             lblExtensions.Name = "lblExtensions";
             lblExtensions.Size = new Size(100, 23);
-            lblExtensions.TabIndex = 10;
+            lblExtensions.TabIndex = 0;
             lblExtensions.Text = "Extensiones:";
             // 
             // txtExtensions
@@ -89,14 +90,14 @@
             txtExtensions.Location = new Point(325, 122);
             txtExtensions.Name = "txtExtensions";
             txtExtensions.Size = new Size(220, 23);
-            txtExtensions.TabIndex = 9;
+            txtExtensions.TabIndex = 1;
             // 
             // lblZipLife
             // 
             lblZipLife.Location = new Point(15, 125);
             lblZipLife.Name = "lblZipLife";
             lblZipLife.Size = new Size(110, 23);
-            lblZipLife.TabIndex = 8;
+            lblZipLife.TabIndex = 2;
             lblZipLife.Text = "Vida ZIP (meses):";
             // 
             // numZipLife
@@ -104,14 +105,14 @@
             numZipLife.Location = new Point(130, 123);
             numZipLife.Name = "numZipLife";
             numZipLife.Size = new Size(80, 23);
-            numZipLife.TabIndex = 7;
+            numZipLife.TabIndex = 3;
             // 
             // lblDay
             // 
             lblDay.Location = new Point(230, 90);
             lblDay.Name = "lblDay";
             lblDay.Size = new Size(89, 23);
-            lblDay.TabIndex = 6;
+            lblDay.TabIndex = 4;
             lblDay.Text = "Día ejecución:";
             // 
             // numDayToRun
@@ -129,7 +130,7 @@
             lblGlobalMonths.Location = new Point(15, 90);
             lblGlobalMonths.Name = "lblGlobalMonths";
             lblGlobalMonths.Size = new Size(110, 23);
-            lblGlobalMonths.TabIndex = 4;
+            lblGlobalMonths.TabIndex = 6;
             lblGlobalMonths.Text = "Meses guardar:";
             // 
             // numGlobalMonths
@@ -137,14 +138,14 @@
             numGlobalMonths.Location = new Point(130, 88);
             numGlobalMonths.Name = "numGlobalMonths";
             numGlobalMonths.Size = new Size(80, 23);
-            numGlobalMonths.TabIndex = 3;
+            numGlobalMonths.TabIndex = 7;
             // 
             // btnSelectDest
             // 
             btnSelectDest.Location = new Point(470, 44);
             btnSelectDest.Name = "btnSelectDest";
             btnSelectDest.Size = new Size(75, 23);
-            btnSelectDest.TabIndex = 2;
+            btnSelectDest.TabIndex = 8;
             btnSelectDest.Text = "...";
             btnSelectDest.Click += btnSelectDest_Click;
             // 
@@ -154,18 +155,19 @@
             txtDestPath.Name = "txtDestPath";
             txtDestPath.ReadOnly = true;
             txtDestPath.Size = new Size(450, 23);
-            txtDestPath.TabIndex = 1;
+            txtDestPath.TabIndex = 9;
             // 
             // lblDest
             // 
             lblDest.Location = new Point(15, 25);
             lblDest.Name = "lblDest";
             lblDest.Size = new Size(150, 23);
-            lblDest.TabIndex = 0;
+            lblDest.TabIndex = 10;
             lblDest.Text = "Ruta Destino Local:";
             // 
             // groupBoxFTP
             // 
+            groupBoxFTP.Controls.Add(chkIsSFTP);
             groupBoxFTP.Controls.Add(lblFTPPath);
             groupBoxFTP.Controls.Add(txtFTPPath);
             groupBoxFTP.Controls.Add(lblFTPPass);
@@ -182,14 +184,24 @@
             groupBoxFTP.Size = new Size(582, 130);
             groupBoxFTP.TabIndex = 1;
             groupBoxFTP.TabStop = false;
-            groupBoxFTP.Text = "Configuración FTP";
+            groupBoxFTP.Text = "Configuración Transferencia";
+            // 
+            // chkIsSFTP
+            // 
+            chkIsSFTP.AutoSize = true;
+            chkIsSFTP.Location = new Point(465, 64);
+            chkIsSFTP.Name = "chkIsSFTP";
+            chkIsSFTP.Size = new Size(66, 19);
+            chkIsSFTP.TabIndex = 0;
+            chkIsSFTP.Text = "Es SFTP";
+            chkIsSFTP.CheckedChanged += chkIsSFTP_CheckedChanged;
             // 
             // lblFTPPath
             // 
             lblFTPPath.Location = new Point(15, 95);
             lblFTPPath.Name = "lblFTPPath";
             lblFTPPath.Size = new Size(100, 23);
-            lblFTPPath.TabIndex = 9;
+            lblFTPPath.TabIndex = 1;
             lblFTPPath.Text = "Ruta Remota:";
             // 
             // txtFTPPath
@@ -197,14 +209,14 @@
             txtFTPPath.Location = new Point(115, 92);
             txtFTPPath.Name = "txtFTPPath";
             txtFTPPath.Size = new Size(430, 23);
-            txtFTPPath.TabIndex = 8;
+            txtFTPPath.TabIndex = 2;
             // 
             // lblFTPPass
             // 
             lblFTPPass.Location = new Point(285, 65);
             lblFTPPass.Name = "lblFTPPass";
             lblFTPPass.Size = new Size(80, 23);
-            lblFTPPass.TabIndex = 7;
+            lblFTPPass.TabIndex = 3;
             lblFTPPass.Text = "Password:";
             // 
             // txtFTPPass
@@ -212,8 +224,8 @@
             txtFTPPass.Location = new Point(365, 62);
             txtFTPPass.Name = "txtFTPPass";
             txtFTPPass.PasswordChar = '*';
-            txtFTPPass.Size = new Size(180, 23);
-            txtFTPPass.TabIndex = 6;
+            txtFTPPass.Size = new Size(80, 23);
+            txtFTPPass.TabIndex = 4;
             // 
             // lblFTPUser
             // 
@@ -228,14 +240,14 @@
             txtFTPUser.Location = new Point(115, 62);
             txtFTPUser.Name = "txtFTPUser";
             txtFTPUser.Size = new Size(150, 23);
-            txtFTPUser.TabIndex = 4;
+            txtFTPUser.TabIndex = 6;
             // 
             // lblFTPPort
             // 
-            lblFTPPort.Location = new Point(411, 30);
+            lblFTPPort.Location = new Point(410, 30);
             lblFTPPort.Name = "lblFTPPort";
-            lblFTPPort.Size = new Size(54, 23);
-            lblFTPPort.TabIndex = 3;
+            lblFTPPort.Size = new Size(55, 23);
+            lblFTPPort.TabIndex = 7;
             lblFTPPort.Text = "Puerto:";
             // 
             // numFTPPort
@@ -244,16 +256,15 @@
             numFTPPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             numFTPPort.Name = "numFTPPort";
             numFTPPort.Size = new Size(80, 23);
-            numFTPPort.TabIndex = 2;
+            numFTPPort.TabIndex = 8;
             numFTPPort.Value = new decimal(new int[] { 21, 0, 0, 0 });
-            numFTPPort.ValueChanged += numFTPPort_ValueChanged;
             // 
             // lblFTPHost
             // 
             lblFTPHost.Location = new Point(15, 30);
             lblFTPHost.Name = "lblFTPHost";
             lblFTPHost.Size = new Size(80, 23);
-            lblFTPHost.TabIndex = 1;
+            lblFTPHost.TabIndex = 9;
             lblFTPHost.Text = "Host FTP:";
             // 
             // txtFTPHost
@@ -261,7 +272,7 @@
             txtFTPHost.Location = new Point(115, 27);
             txtFTPHost.Name = "txtFTPHost";
             txtFTPHost.Size = new Size(280, 23);
-            txtFTPHost.TabIndex = 0;
+            txtFTPHost.TabIndex = 10;
             // 
             // groupBoxFolders
             // 
@@ -270,14 +281,13 @@
             groupBoxFolders.Location = new Point(10, 303);
             groupBoxFolders.Name = "groupBoxFolders";
             groupBoxFolders.Size = new Size(582, 178);
-            groupBoxFolders.TabIndex = 2;
+            groupBoxFolders.TabIndex = 0;
             groupBoxFolders.TabStop = false;
             groupBoxFolders.Text = "Carpetas a Monitorear";
             // 
             // dgvFolders
             // 
             dgvFolders.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvFolders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvFolders.Dock = DockStyle.Fill;
             dgvFolders.Location = new Point(3, 19);
             dgvFolders.Name = "dgvFolders";
@@ -295,7 +305,7 @@
             panelActions.Location = new Point(10, 481);
             panelActions.Name = "panelActions";
             panelActions.Size = new Size(582, 50);
-            panelActions.TabIndex = 3;
+            panelActions.TabIndex = 2;
             // 
             // btnSave
             // 
@@ -372,6 +382,7 @@
         private TextBox txtFTPPass;
         private Label lblFTPPath;
         private TextBox txtFTPPath;
+        private CheckBox chkIsSFTP;
         private GroupBox groupBoxFolders;
         private DataGridView dgvFolders;
         private FlowLayoutPanel panelActions;
